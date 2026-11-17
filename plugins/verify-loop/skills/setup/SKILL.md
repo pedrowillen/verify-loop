@@ -14,9 +14,12 @@ Merge the recommended settings into the user's `~/.claude/settings.json`. A plug
 - Never touch keys outside the list below. Keep everything else exactly as it is.
 
 ## 2. Ask the user (one question each, recommended option first)
-- **Main model**: `opus` (recommended), `sonnet` (cheaper) or keep the current one.
+- **Model pairing** (main model + advisor). Ask about their plan and how complex the project is, and say that complexity matters more than the plan:
+  - Max/Ultra plan or a complex project: main `opus` + advisor `fable`.
+  - Pro plan or a simpler project: main `sonnet` + advisor `opus`.
+  - Or keep their current models, or turn the advisor off.
+  Warn about Fable before they pick it: on some plans Fable usage is billed to usage credits (the `/model` picker shows "Requires usage credits" on the Fable row); Claude Code asks for consent once via `/model fable`, and after that there is no further warning and no spending cap. The advisor must rank at or above the main model.
 - **Effort for the main model**: `medium` (recommended) or keep current.
-- **Advisor**: `opus` (recommended), `fable` or off. Warn about Fable: on some plans Fable usage is billed to usage credits; Claude Code asks for consent once (via `/model fable`) and after that there is no further warning and no spending cap. The advisor must rank at or above the main model.
 - **Compact instructions**: whether to add a `# Compact instructions` section to `~/.claude/CLAUDE.md` (recommended).
 
 ## 3. Proposed changes
