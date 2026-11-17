@@ -1,0 +1,106 @@
+# verify-loop
+
+[Português (Brasil)](README.pt-BR.md)
+
+A Claude Code plugin that gives Claude a **verification loop** and **token-saving defaults**: run the change for real before reviewing it, cap fix rounds, log unverified commits, and trim noisy test output.
+
+> **Credits.** This project is based on practices published by **Anthropic** and the **Claude Code team**, mainly the post [How the Claude Code team thinks about verification](https://claude.dev/blog/how-the-claude-code-team-thinks-about-verification/) and the official guides on [managing costs](https://code.claude.com/docs/en/costs), the [advisor tool](https://code.claude.com/docs/en/advisor) and [code intelligence plugins](https://code.claude.com/docs/en/plugins/code-intelligence). It is an independent community project, **not affiliated with or endorsed by Anthropic**.
+
+## What you get
+
+| Piece | What it does | Token cost |
+|---|---|---|
+| Workflow rules | Injected at session start: plan → implement → verify → review → re-verify → commit. Max 3 fix rounds, no weakening tests, no retry-until-green on flaky tests. | ~400 tokens per session |
+| `/verify-loop:verify` skill | Finds the project's own commands, runs cheap checks first (lint, tests, build), then smoke-tests the changed area in the running app. | Only when used |
+| Commit gate (observe mode) | On every `git commit`, logs which verify/review skills ran in the session; `none` marks an unverified commit. Never blocks. | Zero |
+| Test-output trimmer | Rewrites plain test commands (`npm test`, `./mvnw verify`, `pytest`, `go test`, ...) to show only the last 100 lines, keeping the exit code. | Saves tokens |
+| `/verify-loop:setup` skill | One-time merge of recommended settings, with a backup and your approval. | Once |
+
+### Recommended settings (applied by `/verify-loop:setup`)
+
+- **Main model** Opus at **medium** effort; **subagents** on Sonnet, so broad searches don't run on the expensive model.
+- **Advisor** Opus (or Fable, opt-in): a stronger model Claude consults while planning and when stuck.
+- **Prompt suggestions** and **session recap** off: both send requests while you are idle.
+- **Compact instructions** in `~/.claude/CLAUDE.md`, so compaction keeps decisions, changed files and failing output.
+
+## Install
+
+In a Claude Code session (terminal, desktop app or VS Code):
+
+```
+/plugin marketplace add pedrowillen/verify-loop
+/plugin install verify-loop@verify-loop
+```
+
+Then run the one-time setup:
+
+```
+/verify-loop:setup
+```
+
+Start a new session afterwards. In the desktop app you can also use **+ → Add plugins** after adding the marketplace.
+
+### Requirements
+
+- **Claude Code** with plugin support.
+- **bash** for the hooks (on Windows: [Git for Windows](https://git-scm.com/download/win), which Claude Code already uses).
+- **Node.js** for the test-output trimmer.
+- Optional: [ponytail](https://github.com/DietrichGebert/ponytail) for `/ponytail-review`. Without it the rules fall back to `/code-review` and `/simplify`.
+
+## The workflow
+
+1. **Plan.** Consult the advisor when planning a new feature and when an error keeps recurring. Not to declare done: the reviews cover that.
+2. **Implement**, with a test for new logic.
+3. **`/verify-loop:verify`**: run the change for real. At most 3 fix rounds, then stop and ask.
+4. **`/ponytail-review`** on non-trivial changes.
+5. **`/security-review`** only when the diff touches auth, user input, secrets, network, files, dependencies or personal data.
+6. **Re-verify** if the reviews changed code.
+7. **Commit.**
+
+Your project's `CLAUDE.md` wins on commands and stricter rules. If it duplicates or contradicts this workflow, Claude points out the lines and offers to remove them.
+
+## Commit gate log
+
+The gate writes to `~/.claude/plugins/data/verify-loop-verify-loop/gate.log`:
+
+```
+2026-11-17 18:02:11 | ponytail-review security-review verify | C:/projects/app | <session id>
+2026-11-17 19:40:05 | none | C:/projects/app | <session id>
+```
+
+Use it for a week or two to see how often commits go out unverified. Known limit: it counts any review in the session, even if edits came after it.
+
+## Optional: code intelligence
+
+Language servers let Claude navigate by symbol and see type errors right after each edit, instead of grepping and reading many files. Install the server binary, then the official plugin:
+
+| Language | Binary | Plugin |
+|---|---|---|
+| TypeScript / JavaScript | `npm install -g typescript-language-server typescript` | `typescript-lsp@claude-plugins-official` |
+| Java | [Eclipse JDT.LS](https://download.eclipse.org/jdtls/milestones/) + JDK 17+ | `jdtls-lsp@claude-plugins-official` |
+| Others | see the [official table](https://code.claude.com/docs/en/plugins/code-intelligence) | |
+
+**Java on Windows:** the plugin runs a command named `jdtls`, and the bundled `jdtls.bat` ends with `pause`, which hangs. Extract JDT.LS (for example to `%USERPROFILE%\.local\share\jdtls`) and put this `jdtls.cmd` in a folder on your `PATH` (requires Python):
+
+```bat
+@echo off
+python "%USERPROFILE%\.local\share\jdtls\bin\jdtls" %*
+```
+
+## Advisor and Fable billing
+
+On some plans, Fable usage (including Fable as the advisor) is billed to **usage credits**. Claude Code asks for consent once, via `/model fable`; after that there is no further warning and no spending cap. That is why setup recommends Opus as the advisor and keeps Fable opt-in. Watch the usage-credits row in `/usage`, and set a monthly limit in claude.ai → Settings → Usage.
+
+Each advisor call re-reads the whole conversation without cache, so short sessions (`/clear` between unrelated tasks) also make the advisor cheaper.
+
+## Uninstall
+
+```
+/plugin uninstall verify-loop@verify-loop
+```
+
+Setup keeps a backup at `~/.claude/settings.json.bak-verify-loop`. The compact instructions sit between `<!-- verify-loop:compact -->` markers in `~/.claude/CLAUDE.md`.
+
+## License
+
+[MIT](LICENSE)
