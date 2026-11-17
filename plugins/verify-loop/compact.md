@@ -1,0 +1,1 @@
+When compacting, keep: the user's decisions and approvals, changed files (with paths), errors and failing test output, what was verified and what is left, and the next steps. Drop tool output that is already resolved.

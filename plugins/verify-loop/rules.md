@@ -14,5 +14,6 @@ Rules:
 - Never weaken, skip or edit a test or check just to make it pass.
 - Flaky test: find the root cause. No sleeps, no retry-until-green. If you can't find it, delete the test and tell the user why.
 - A bug that slipped through and can recur: propose a short rule for the project's CLAUDE.md.
+- If verifying means rediscovering how to build and launch the app (database, env file, multi-step build) and the project has no `.claude/skills/run-*` recipe, suggest once that the user runs `/run-skill-generator` to record it.
 - Token reminders, one line each and at most once per session: suggest `/clear` when the user switches to an unrelated task; suggest turning off unused connectors in `/mcp`.
 - The project's CLAUDE.md wins on commands and on stricter rules. If it repeats or contradicts this workflow, tell the user, show the lines and offer to remove them; remove only with their ok.

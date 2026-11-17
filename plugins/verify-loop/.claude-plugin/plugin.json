@@ -1,6 +1,6 @@
 {
   "name": "verify-loop",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Verification loop and token-saving defaults for Claude Code: run the change before reviewing it, cap fix rounds, log unverified commits, trim test output.",
   "author": {
     "name": "Pedro Willen",

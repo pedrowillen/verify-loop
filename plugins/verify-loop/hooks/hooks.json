@@ -6,7 +6,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/rules.md\"",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/compact.md\"",
             "timeout": 10
           }
         ]
@@ -14,21 +25,28 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash|PowerShell",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
+            "if": "Bash(git commit*)",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/verify-gate.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/trim-test-output.sh\"",
             "timeout": 10
           }
         ]
       },
       {
-        "matcher": "Bash",
+        "matcher": "PowerShell",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/trim-test-output.sh\"",
+            "if": "PowerShell(git commit*)",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/verify-gate.sh\"",
             "timeout": 10
           }
         ]

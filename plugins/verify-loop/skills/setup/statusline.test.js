@@ -23,6 +23,14 @@ test('after a commit with some context used suggests /clear', () => {
   assert.doesNotMatch(line(at(10), { compactAt: 70, committed: true }), /committed/);
 });
 
+test('expired prompt cache suggests /clear, and beats the commit hint', () => {
+  const now = 1_000_000_000_000;
+  const withCache = (expiresInSec) => ({ ...at(30), prompt_cache: { caching_observed: true, expires_at: now / 1000 + expiresInSec } });
+  assert.match(line(withCache(-1), { compactAt: 70, committed: true, now }), /cache cold/);
+  assert.doesNotMatch(line(withCache(60), { compactAt: 70, now }), /cache cold/);
+  assert.doesNotMatch(line({ ...at(30), prompt_cache: { caching_observed: false, expires_at: null } }, { compactAt: 70, now }), /cache cold/);
+});
+
 test('without the override, the warning starts at 70%', () => {
   assert.match(line(at(72), {}), /almost full/);
   assert.doesNotMatch(line(at(72), {}), /compact at/);

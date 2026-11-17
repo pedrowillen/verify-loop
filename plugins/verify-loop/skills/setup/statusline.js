@@ -7,7 +7,7 @@ const os = require('os');
 
 const GATE_LOG = path.join(os.homedir(), '.claude', 'plugins', 'data', 'verify-loop-verify-loop', 'gate.log');
 
-function line(input, { compactAt, committed }) {
+function line(input, { compactAt, committed, now = Date.now() }) {
   const model = input.model?.display_name || 'Claude';
   const pct = input.context_window?.used_percentage;
   if (pct == null) return model;
@@ -17,8 +17,13 @@ function line(input, { compactAt, committed }) {
   const bar = '▓'.repeat(filled) + '░'.repeat(10 - filled);
   let out = `${model} · ctx ${bar} ${used}%` + (compactAt ? ` (compact at ${compactAt}%)` : '');
 
+  // Cold cache: the next message re-reads the whole context at full price.
+  const pc = input.prompt_cache;
+  const cold = pc?.caching_observed && pc.expires_at && now > pc.expires_at * 1000;
+
   const soon = (compactAt || 80) - 10;
   if (used >= soon) out += ' · context almost full: /clear if the next task is unrelated';
+  else if (cold && used >= 20) out += ' · cache cold: next message re-reads all context, /clear is cheaper for a new task';
   else if (committed && used >= 20) out += ' · committed: good moment to /clear before the next task';
   return out;
 }
