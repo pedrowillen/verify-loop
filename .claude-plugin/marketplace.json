@@ -1,0 +1,15 @@
+{
+  "name": "verify-loop",
+  "description": "Verification loop and token-saving defaults for Claude Code.",
+  "owner": {
+    "name": "Pedro Willen",
+    "url": "https://github.com/pedrowillen"
+  },
+  "plugins": [
+    {
+      "name": "verify-loop",
+      "source": "./plugins/verify-loop",
+      "description": "Verification loop and token-saving defaults for Claude Code, based on practices published by Anthropic and the Claude Code team."
+    }
+  ]
+}

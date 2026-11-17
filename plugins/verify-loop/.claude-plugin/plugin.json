@@ -1,0 +1,13 @@
+{
+  "name": "verify-loop",
+  "version": "0.1.0",
+  "description": "Verification loop and token-saving defaults for Claude Code: run the change before reviewing it, cap fix rounds, log unverified commits, trim test output.",
+  "author": {
+    "name": "Pedro Willen",
+    "url": "https://github.com/pedrowillen"
+  },
+  "homepage": "https://github.com/pedrowillen/verify-loop",
+  "repository": "https://github.com/pedrowillen/verify-loop",
+  "license": "MIT",
+  "keywords": ["verification", "testing", "code-review", "tokens", "workflow"]
+}
