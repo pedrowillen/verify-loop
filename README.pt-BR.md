@@ -18,10 +18,23 @@ Um plugin do Claude Code que dá ao Claude um **loop de verificação** e **padr
 
 ### Configurações recomendadas (aplicadas pelo `/verify-loop:setup`)
 
-- **Modelo principal** Opus com esforço **medium**; **subagentes** no Sonnet, para buscas amplas não rodarem no modelo caro.
-- **Advisor** Opus (ou Fable, se você optar): um modelo mais forte que o Claude consulta ao planejar e quando trava.
+- **Modelo principal e advisor** escolhidos conforme o seu projeto, veja [Quais modelos usar](#quais-modelos-usar). O modelo principal roda com esforço **medium**.
+- **Subagentes** no Sonnet, para buscas amplas não rodarem no modelo caro.
 - **Sugestões de prompt** e **resumo de sessão** desligados: os dois fazem requisições enquanto você está parado.
 - **Instrução de compactação** no `~/.claude/CLAUDE.md`, para o resumo da conversa preservar decisões, arquivos alterados e erros.
+
+## Quais modelos usar
+
+O modelo principal faz quase todo o trabalho; o [advisor](https://code.claude.com/docs/en/advisor) é um modelo mais forte que ele consulta nos momentos de decisão (planejamento, erros que se repetem). A nossa recomendação:
+
+| Sua situação | Modelo principal | Advisor |
+|---|---|---|
+| **Plano Max ou Ultra**, ou projeto complexo (código grande, arquitetura, bugs difíceis) | Opus 5.5, esforço medium | Fable 5.2 |
+| **Plano Pro**, ou projeto mais simples (app pequeno, scripts, features de rotina) | Sonnet 5.5, esforço medium | Opus 5.5 |
+
+**A complexidade do projeto pesa mais do que o plano.** Quem tem Max e está fazendo um script pequeno se dá melhor com a linha do Pro, e quem tem Pro num código difícil pode subir para Opus 5.5 + Fable 5.2 se os limites permitirem.
+
+O Claude Code aceita as duas combinações: o advisor precisa ser igual ou mais forte que o modelo principal. Antes de escolher o Fable, leia [Advisor e a cobrança do Fable](#advisor-e-a-cobrança-do-fable): em alguns planos ele é cobrado em usage credits. O `/verify-loop:setup` pergunta qual linha combina com você.
 
 ## Instalação
 
@@ -89,7 +102,7 @@ python "%USERPROFILE%\.local\share\jdtls\bin\jdtls" %*
 
 ## Advisor e a cobrança do Fable
 
-Em alguns planos, o uso do Fable (inclusive como advisor) é cobrado em **usage credits**. O Claude Code pede consentimento uma única vez, pelo `/model fable`; depois disso não aparece mais nenhum aviso e não há limite de gasto. Por isso o setup recomenda o Opus como advisor e deixa o Fable como opção. Acompanhe a linha de usage credits no `/usage` e defina um limite mensal em claude.ai → Settings → Usage.
+Em alguns planos, o uso do Fable (inclusive como advisor) é cobrado em **usage credits**. Quando isso acontece, a linha do Fable no seletor `/model` mostra "Requires usage credits", e o Claude Code pede consentimento uma única vez, pelo `/model fable`; depois disso não aparece mais nenhum aviso e não há limite de gasto. Se você vir esse rótulo e não quiser cobrança extra, use o Opus 5.5 como advisor. Acompanhe a linha de usage credits no `/usage` e defina um limite mensal em claude.ai → Settings → Usage.
 
 Cada consulta ao advisor relê a conversa inteira sem cache, então sessões curtas (`/clear` entre tarefas sem relação) também deixam o advisor mais barato.
 
