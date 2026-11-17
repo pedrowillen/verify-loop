@@ -21,7 +21,17 @@ Um plugin do Claude Code que dá ao Claude um **loop de verificação** e **padr
 - **Modelo principal e advisor** escolhidos conforme o seu projeto, veja [Quais modelos usar](#quais-modelos-usar). O modelo principal roda com esforço **medium**.
 - **Subagentes** no Sonnet, para buscas amplas não rodarem no modelo caro.
 - **Sugestões de prompt** e **resumo de sessão** desligados: os dois fazem requisições enquanto você está parado.
+- **Auto-compact em 70%** da janela de contexto, enquanto a conversa ainda está nítida. Um contexto menor também deixa cada mensagem seguinte mais barata.
 - **Instrução de compactação** no `~/.claude/CLAUDE.md`, para o resumo da conversa preservar decisões, arquivos alterados e erros.
+- **Pastas bloqueadas**: o Claude não lê `node_modules`, `dist`, `.next`, `coverage` nem lockfiles (o Grep e o Glob também ficam bloqueados ali). `build` e `target` são opcionais, porque o Gradle e o Maven guardam os relatórios de teste nelas.
+- **Statusline** com o contexto usado e uma dica de quando vale dar `/clear`:
+
+  ```
+  Opus 5.5 · ctx ▓▓▓░░░░░░░ 31% (compact at 70%) · committed: good moment to /clear before the next task
+  Opus 5.5 · ctx ▓▓▓▓▓▓░░░░ 64% (compact at 70%) · context almost full: /clear if the next task is unrelated
+  ```
+
+  A dica aparece depois de um commit na sessão (com pelo menos 20% usados) ou a 10 pontos do limite do compact.
 
 ## Quais modelos usar
 
@@ -112,7 +122,7 @@ Cada consulta ao advisor relê a conversa inteira sem cache, então sessões cur
 /plugin uninstall verify-loop@verify-loop
 ```
 
-O setup guarda um backup em `~/.claude/settings.json.bak-verify-loop`. A instrução de compactação fica entre os marcadores `<!-- verify-loop:compact -->` no `~/.claude/CLAUDE.md`.
+O setup guarda um backup em `~/.claude/settings.json.bak-verify-loop`. O script da statusline fica em `~/.claude/verify-loop/`; apague-o junto com a chave `statusLine` para desligá-la. A instrução de compactação fica entre os marcadores `<!-- verify-loop:compact -->` no `~/.claude/CLAUDE.md`.
 
 ## Licença
 

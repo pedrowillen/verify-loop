@@ -21,7 +21,17 @@ A Claude Code plugin that gives Claude a **verification loop** and **token-savin
 - **Main model and advisor** picked for your project, see [Which models to use](#which-models-to-use). The main model runs at **medium** effort.
 - **Subagents** on Sonnet, so broad searches don't run on the expensive model.
 - **Prompt suggestions** and **session recap** off: both send requests while you are idle.
+- **Auto-compact at 70%** of the context window, while the conversation is still sharp. A smaller context also makes every later turn cheaper.
 - **Compact instructions** in `~/.claude/CLAUDE.md`, so compaction keeps decisions, changed files and failing output.
+- **Blocked folders**: Claude can't read `node_modules`, `dist`, `.next`, `coverage` or lockfiles (also blocks Grep and Glob there). `build` and `target` are optional, because Gradle and Maven keep test reports in them.
+- **Status line** with the context used and a hint for when `/clear` is worth it:
+
+  ```
+  Opus 5.5 · ctx ▓▓▓░░░░░░░ 31% (compact at 70%) · committed: good moment to /clear before the next task
+  Opus 5.5 · ctx ▓▓▓▓▓▓░░░░ 64% (compact at 70%) · context almost full: /clear if the next task is unrelated
+  ```
+
+  The hint shows up after a commit in the session (with at least 20% used) or within 10 points of the compact threshold.
 
 ## Which models to use
 
@@ -112,7 +122,7 @@ Each advisor call re-reads the whole conversation without cache, so short sessio
 /plugin uninstall verify-loop@verify-loop
 ```
 
-Setup keeps a backup at `~/.claude/settings.json.bak-verify-loop`. The compact instructions sit between `<!-- verify-loop:compact -->` markers in `~/.claude/CLAUDE.md`.
+Setup keeps a backup at `~/.claude/settings.json.bak-verify-loop`. The status line script lives in `~/.claude/verify-loop/`; remove it and the `statusLine` key to turn it off. The compact instructions sit between `<!-- verify-loop:compact -->` markers in `~/.claude/CLAUDE.md`.
 
 ## License
 
